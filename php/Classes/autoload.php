@@ -16,7 +16,7 @@ spl_autoload_register(function($class){
 	 * baseDir: the base directory for all classes (default = current directory)
 	 **/
 	$prefix = "Nwoodard\\ObjectOriented";
-	$baseDir = _Dir_;
+	$baseDir = __DIR__;
 
 	// does the class use the namespace prefix?
 	$len = strlen($prefix);

@@ -2,7 +2,8 @@
 namespace Nwoodard\ObjectOriented;
 
 require_once("autoload.php");
-require_once(dirname(_DIR_, 2) . "/Classes/Author.php");
+require_once(dirname(__DIR__, 2) . "/vendor/autoload.php");
+require_once ("ValidateUuid.php");
 
 use Ramsey\Uuid\Uuid;
 
@@ -195,12 +196,12 @@ class Author {
 	 **/
 	public function setAuthorEmail($newAuthorEmail): void {
 	$newAuthorEmail = trim($newAuthorEmail);
-	$newAuthorEmail = filter_var($newAuthorEmail, FILTER_VALIDATE_EMAIL);
-		if(empty($newAuthorEmail === true) {
+	$newAuthorEmail = filter_var($newAuthorEmail, FILTER_VALIDATE_EMAIL, FILTER_FLAG_NO_ENCODE_QUOTES);
+		if(empty($newAuthorEmail) === true) {
 		throw(new \InvalidArgumentException("The author email address is not valid or is insecure."));
 		}
 		//Verufy that the email address is no longer than 128 characters
-		if(stlen($newAuthorEmail) >128){
+		if(strlen($newAuthorEmail) >128){
 			throw (new \RangeException("The email address must be no longer than 128 characters."));
 		}
 		//Store the author email
@@ -245,7 +246,7 @@ class Author {
 
 	public function getAuthorUsername(): string {
 		return $this->authorUsername;
-
+	}
 		/**
 		 * mutator method for the author username
 		 *
@@ -254,8 +255,7 @@ class Author {
 		 * @throws \RangeException if $newAuthorUsername is longer than 32 characters
 		 **/
 
-		public
-		function setAuthorUsername(string $newAuthorUsername): void {
+	public function setAuthorUsername(string $newAuthorUsername) : void {
 			//Ensure the username is formatted correctly
 			$newAuthorUsername = trim($newAuthorUsername);
 			$newAuthorUsername = filter_var($newAuthorUsername, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
@@ -263,14 +263,14 @@ class Author {
 				throw (new \InvalidArgumentException("The user name is invalid or insecure."));
 			}
 			//Verify the username is no longer than 32 characters
-			if(stlen($newAuthorUsername) > 32) {
+			if(strlen($newAuthorUsername) > 32) {
 				throw (new \RangeException("The username cannot be longer."));
 			}
-
-		}
 		//Store the username
 		$this->authorUsername = $newAuthorUsername;
-	}
+		}
+
+
 
 	/**
 	 * insert this author into mySQL
