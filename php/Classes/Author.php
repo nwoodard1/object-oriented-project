@@ -4,8 +4,6 @@ namespace Nwoodard\ObjectOriented;
 require_once("autoload.php");
 require_once(dirname(_DIR_, 2) . "/Classes/Author.php");
 
-//use http\Exception\BadQueryStringException;
-//use http\Exception\InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -190,23 +188,88 @@ class Author {
 	/**
 	 * mutator method for author email
 	 *
-	 * @param \DateTime|string|null $newAuthorEmail author email as a DateTime object or string (or null to load the current time)
+	 * @param string|null $newAuthorEmail author email
 	 * @throws \InvalidArgumentException if $newAuthorEmail is not a valid object or string
 	 * @throws \RangeException if $newAuthorEmail is an email that does not exist
+	 *
 	 **/
-	public function setAuthorEmail($newAuthorEmail = null): void {
-		//base case: if the email is null, use the previous email
-		if($newAuthorEmail === null) {
-			$this->authorEmail = new \DateTime();
+	public function setAuthorEmail($newAuthorEmail): void {
+	$newAuthorEmail = trim($newAuthorEmail);
+	$newAuthorEmail = filter_var($newAuthorEmail, FILTER_VALIDATE_EMAIL);
+		if(empty($newAuthorEmail === true) {
+		throw(new \InvalidArgumentException("The author email address is not valid or is insecure."));
 		}
-//store the like date using the ValidateDate trait
-		try {
-			$newAuthorEmail = self::validateDateTime($newAuthorEmail);
-		} catch(\InvalidArgumentException | \RangeException $exception) {
-			$exceptionType = get_class($exception);
-			throw(new $exceptionType($exception->getMessage(), 0, $exception));
+		//Verufy that the email address is no longer than 128 characters
+		if(stlen($newAuthorEmail) >128){
+			throw (new \RangeException("The email address must be no longer than 128 characters."));
 		}
+		//Store the author email
 		$this->authorEmail = $newAuthorEmail;
+	}
+
+	/**
+	 * accessor method for the authorHash
+	 *
+	 * @return string value of the author hash
+	 **/
+	public function getAuthorHash(): string {
+		return $this->authorHash;
+	}
+	/**
+	 * mutator method for the author hash
+	 *
+	 * @param string $newAuthorHash new value for the author hash
+	 * @throws \InvalidArgumentException if the hash is not secure
+	 * @throws \RangeException if the hash is linger than 97 character
+	 **/
+
+	public function setAuthorHash(string $newAuthorHash): void {
+		//Ensure that the hash is formatted correctly
+		$newAuthorHash = trim($newAuthorHash);
+		if(empty($newAuthorHash) === true) {
+			throw (new \InvalidArgumentException("The hash is empty or insecure."));
+		}
+		//Ensure the hash is an Argon hash
+		if(strlen($newAuthorHash) >97) {
+			throw (new \RangeException("The hash must be no longer than 97 characters."));
+		}
+		//Store the hash
+		$this->authorHash = $newAuthorHash;
+	}
+
+	/**
+	 * Accessor method for the authorUsername
+	 *
+	 * @return string value or the author username
+	 **/
+
+	public function getAuthorUsername(): string {
+		return $this->authorUsername;
+
+		/**
+		 * mutator method for the author username
+		 *
+		 * @param string $newAuthorUsername new value for the author username
+		 * @throws \InvalidArgumentException if $newAuthorUsername is not a string or is insecure
+		 * @throws \RangeException if $newAuthorUsername is longer than 32 characters
+		 **/
+
+		public
+		function setAuthorUsername(string $newAuthorUsername): void {
+			//Ensure the username is formatted correctly
+			$newAuthorUsername = trim($newAuthorUsername);
+			$newAuthorUsername = filter_var($newAuthorUsername, FILTER_SANITIZE_STRING, FILTER_FLAG_NO_ENCODE_QUOTES);
+			if(empty($newAuthorUsername) === true) {
+				throw (new \InvalidArgumentException("The user name is invalid or insecure."));
+			}
+			//Verify the username is no longer than 32 characters
+			if(stlen($newAuthorUsername) > 32) {
+				throw (new \RangeException("The username cannot be longer."));
+			}
+
+		}
+		//Store the username
+		$this->authorUsername = $newAuthorUsername;
 	}
 
 	/**
@@ -215,10 +278,9 @@ class Author {
 	 * @param \PDO $pdo PDO connection object
 	 * @throws \PDOException when mySQL related errors occur
 	 * @throws \TypeError if $pdo is not a PDO connection object
-	 **/
 	public function insert(\PDO $pdo): void {
 		// create query template
-		$query = "INSERT INTO author(authorId, authorAvatarUrl, authorActivationToken, authorEmail, authorHash) VALUES(:authorId, :authorAvatarUrl, :authorActivationToken, :authorEmail, authorHash)";
+		$query = "INSERT INTO author(authorId, authorAvatarUrl, authorActivationToken, authorEmail, authorHash, authorUsername) VALUES(:authorId, :authorAvatarUrl, :authorActivationToken, :authorEmail, authorHash, authorUsername)";
 		$statement = $pdo->prepare($query);
 
 //bind the member variables to the place holders in the template
@@ -234,6 +296,7 @@ class Author {
 	 * @throws \PDOException when mySQL related errors occur
 	 * @throws \TypeError if $pdo is not a PDO connection object
 	 **/
+	/**
 	public function delete(\PDO $pdo): void {
 
 		// create query template
@@ -254,6 +317,7 @@ class Author {
 	 * @throws \PDOException when mySQL related errors occur
 	 * @throws \TypeError when a variable is not the correct data type
 	 **/
+	/**
 	public static function getAuthorByAuthorId(\PDO $pdo, $authorId): ?Author {
 		// sanitize the authorId before searching
 			try {
@@ -292,6 +356,7 @@ class Author {
  * @throws \PDOException when mySQL related errors occur
  * @throws \TypeError when variables are not the correct data type
  **/
+	/**
 public static function getAuthorByAuthorAvatarUrl(\PDO $pso, $authorAvatarUrl) : \SplFixedArray {
 			try {
 						$authorAvatarUrl = self::validateUuid($authorAvatarUrl);
@@ -302,7 +367,7 @@ public static function getAuthorByAuthorAvatarUrl(\PDO $pso, $authorAvatarUrl) :
 			$query = "SELECT authorId, authorAvatarUrl, authorActivationToken, authorEmail, authorHash, authorUsername FROM author WHERE authorAvatarUrl = :authorAvatarUrl";
 			$statement = $pdo->prepare($query);
 			// bind the authorAvatarUrl id to the place holder in the template
-	/		$parameters = ["authorAvatarUrl" => $authorAvatarUrl->getBytes()];
+			$parameters = ["authorAvatarUrl" => $authorAvatarUrl->getBytes()];
 			$statement->execute($parameters);
 			//build an array of authors
 			$author = new \SplFixedArray($statement->rowCount());
@@ -312,8 +377,5 @@ public static function getAuthorByAuthorAvatarUrl(\PDO $pso, $authorAvatarUrl) :
 							$author = new Author($row["authorId"], $row["authorAvatarUrl"], $row["authorActivationToken"], $row["authorEmail"], $row["authorHash"], $row["authorUsername"]);
 							$authors[$authors->key()] = $author;
 							$authors->next();
-
-
-			}
-}
-}
+	 * */
+	}
