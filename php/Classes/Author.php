@@ -278,104 +278,134 @@ class Author {
 	 * @param \PDO $pdo PDO connection object
 	 * @throws \PDOException when mySQL related errors occur
 	 * @throws \TypeError if $pdo is not a PDO connection object
+	 **/
+
 	public function insert(\PDO $pdo): void {
 		// create query template
-		$query = "INSERT INTO author(authorId, authorAvatarUrl, authorActivationToken, authorEmail, authorHash, authorUsername) VALUES(:authorId, :authorAvatarUrl, :authorActivationToken, :authorEmail, authorHash, authorUsername)";
+		$query = "INSERT INTO author(authorId, authorAvatarUrl, authorActivationToken, authorEmail, authorHash, authorUsername) VALUES(:authorId, :authorAvatarUrl, :authorActivationToken, :authorEmail, :authorHash, :authorUsername)";
 		$statement = $pdo->prepare($query);
 
-//bind the member variables to the place holders in the template
-		$formattedDate = $this->authorEmail->format("Y-m-d H:i:s.u");
-		$parameters = ["authorId" => $this->authorId->getBytes(), "authorAvatarUrl" => $this->authorAvatarUrl->getBytes(), "authorActivationToken" => $this->authorActivationToken, "authorEmail" => $formattedDate];
+		//bind the member variables to the place holders in the template
+		$parameters = ["authorId" => $this->authorId->getBytes(), "authorAvatarUrl" => $this->authorAvatarUrl->getBytes(), "authorActivationToken" => $this->authorActivationToken, "authorEmail"=> $this->authorEmail->getBytes(), "authorUsername"=> $this->authorUsername->getBytes()];
 		$statement->execute($parameters);
 	}
-
-	/**
-	 * deletes this author from mySQL
-	 *
-	 * @param \PDO $pdo PDO connection object
-	 * @throws \PDOException when mySQL related errors occur
-	 * @throws \TypeError if $pdo is not a PDO connection object
-	 **/
-	/**
-	public function delete(\PDO $pdo): void {
+/**
+ * deletes this author from mySQL
+*
+* @param \PDO $pdo PDO connection object
+* @throws \PDOException when mySQL related errors occur
+* @throws \TypeError if $pdo is not a PDO connection object
+**/
+	public function delete(\PDO $pdo) : void {
 
 		// create query template
 		$query = "DELETE FROM author WHERE authorId = :authorId";
 		$statement = $pdo->prepare($query);
 
-		//bind the member variables to the place holder in the template
-		$parameters = ["tweetId" => $this->authorId->getBytes()];
+		// bind the member variables to the place holder in the template
+		$parameters = ["authorId" => $this->authorId->getBytes()];
 		$statement->execute($parameters);
 	}
-
 	/**
-	 * gets the author by authorId
+	 /**
+	 * updates this author in MySQL
 	 *
 	 * @param \PDO $pdo connection object
-	 * @param Uuuid|string $authorId author id to search for
+	 * @throws \PDOException when mySQL related errors occur
+	 * @throws \TypeError if $pdo is not a PDO connection object
+	 */
+	public function update (\PDO $pdo) : void {
+
+	//create query template
+	$query = "UPDATE author SET authorId = :authorId, authorAvatarUrl = :authorAvatarUrl, authorActivationToken = :authorActivationToken, authorEmail = :authorEmail, authorHash = :authorHash, authorUsername = :authorUsername";
+	$statement = $pdo->prepare($query);
+
+	$parameters = ["authorId"=> $this->authorId->getBytes(), "authorAvatarUrl"=> $this->authorAvatarUrl->getBytes(), "authorActivationToken"=> $this->authorActivationToken->getBytes, "authorEmail"=> $this->authorEmail, "authorHash"=> $this->authorHash, "authorUsername"=> $this->authorUsername];
+	$statement->execute($parameters);
+	}
+	/**
+	 * gets the Author by authorId
+	 *
+	 * @param \PDO $pdo PDO connection object
+	 * @param Uuid|string $authorId author id to search for
 	 * @return Author|null Author found or null if not found
 	 * @throws \PDOException when mySQL related errors occur
-	 * @throws \TypeError when a variable is not the correct data type
+	 * @throws \TypeError when a variable are not the correct data type
 	 **/
-	/**
-	public static function getAuthorByAuthorId(\PDO $pdo, $authorId): ?Author {
+	public static function getAuthorByAuthorId(\PDO $pdo, $authorId) : ?Author {
 		// sanitize the authorId before searching
-			try {
-						$authorId = self::validateUUid($authorId);
+		try {
+			$authorId = self::validateUuid($authorId);
 		} catch(\InvalidArgumentException | \RangeException | \Exception | \TypeError $exception) {
-				throw(new \PDOException($exception->getmessage(), 0, $exception));
-			}
-			// create query template
-			$query = "SELECT authorId, authorAvatarUrl, authorActivationToken, authorEmail, authorHash FROM author WHERE authorId = :authorId";
-			$statement = $pdo->prepare($query);
+			throw(new \PDOException($exception->getMessage(), 0, $exception));
+		}
 
-			// bind the author id to the place holder in the template
-			$parameters = ["authorId" => $authorId->getBytes()];
-			$statement->execute($parameters);
+		// create query template
+		$query = "SELECT authorId, authorAvatarURL, authorActivationToken, authorEmail, authorHash, authorUsername FROM author WHERE authorId = :authorId";
+		$statement = $pdo->prepare($query);
 
-			//grab the author from mySQL
-			try {
-						$author = null;
-						$statement->setFetchMode(\PDO::FETCH_ASSOC);
-						$row = $statement->fetch();
-						if($row !== false) {
-									$author = new Author($row["authorId"], $row["authorAvatarUrl"], $row["authorActivationToken"], $row["authorEmail"], $row["authorHash"], $row["authorUsername"]);
-						}
-			} catch(\Exception $exception){
-						//if the row couldn't be converted, rethrow it
-						throw(new \PDOException($exception->getMessage(), 0, $exception));
-			}
-			return ($author);
-}
-/**
- * gets the Author by author id
- *
- * @param \PDO $pdo PDO connection object
- * @param Uuid|string $authorAvatarUrl author id to search by
- * @return \SplFixedArray SplFixedArray of Author found
- * @throws \PDOException when mySQL related errors occur
- * @throws \TypeError when variables are not the correct data type
- **/
-	/**
-public static function getAuthorByAuthorAvatarUrl(\PDO $pso, $authorAvatarUrl) : \SplFixedArray {
-			try {
-						$authorAvatarUrl = self::validateUuid($authorAvatarUrl);
-			} catch(\InvalidArgumentException | \RangeException | \Exception | \TypeError $exception) {
-						throw(new \PDOException($exception->getMessage(), 0, $exception));
-			}
-			//create query template
-			$query = "SELECT authorId, authorAvatarUrl, authorActivationToken, authorEmail, authorHash, authorUsername FROM author WHERE authorAvatarUrl = :authorAvatarUrl";
-			$statement = $pdo->prepare($query);
-			// bind the authorAvatarUrl id to the place holder in the template
-			$parameters = ["authorAvatarUrl" => $authorAvatarUrl->getBytes()];
-			$statement->execute($parameters);
-			//build an array of authors
-			$author = new \SplFixedArray($statement->rowCount());
+		// bind the tweet id to the place holder in the template
+		$parameters = ["authorId" => $authorId->getBytes()];
+		$statement->execute($parameters);
+
+		// grab the author from mySQL
+		try {
+			$author = null;
 			$statement->setFetchMode(\PDO::FETCH_ASSOC);
-			while(($row = $statement->fetch()) !==false){
-						try {
-							$author = new Author($row["authorId"], $row["authorAvatarUrl"], $row["authorActivationToken"], $row["authorEmail"], $row["authorHash"], $row["authorUsername"]);
-							$authors[$authors->key()] = $author;
-							$authors->next();
-	 * */
+			$row = $statement->fetch();
+			if($row !== false) {
+				$author = new Author($row["authorId"], $row["authorAvatarUrl"], $row["authorActivationToken"], $row["authorEmail"], $row["authorHash"], $row[authorUsername]);
+			}
+		} catch(\Exception $exception) {
+			// if the row couldn't be converted, rethrow it
+			throw(new \PDOException($exception->getMessage(), 0, $exception));
+		}
+		return ($author);
 	}
+			/**
+			 *
+	 * gets all Authors
+	 *
+	 * @param \PDO $pdo PDO connection object
+	 * @return \SplFixedArray SplFixedArray of Authors found or null if not found
+	 * @throws \PDOException when mySQL related errors occur
+	 * @throws \TypeError when variables are not the correct data type
+	 **/
+	public static function getAllAuthors(\PDO $pdo) : \SPLFixedArray {
+		// create query template
+		$query = "SELECT authorId, authorAvatarUrl, authorActivationToken, authorEmail, authorHash, authorUsername FROM author";
+		$statement = $pdo->prepare($query);
+		$statement->execute();
+
+		// build an array of authors
+		$author = new \SplFixedArray($statement->rowCount());
+		$statement->setFetchMode(\PDO::FETCH_ASSOC);
+		while(($row = $statement->fetch()) !== false) {
+			try {
+				$author = new Author($row["authorId"], $row["authorAvatarUrl"], $row["authorActivationToken"], $row["authorEmail"], $row["authorHash"], $row["authorUsername"]);
+				$author[$author->key()] = $author;
+				$author->next();
+			} catch(\Exception $exception) {
+				// if the row couldn't be converted, rethrow it
+				throw(new \PDOException($exception->getMessage(), 0, $exception));
+			}
+		}
+		return ($author);
+	}
+
+	/**
+	 * formats the state variables for JSON serialization
+	 *
+	 * @return array resulting state variables to serialize
+	 **/
+	public function jsonSerialize() : array {
+		$fields = get_object_vars($this);
+
+		$fields["authorId"] = $this->authorId->toString();
+		$fields["authorAvatarUrl"] = $this->authorAvatarUrl->toString();
+
+		//format the date so that the front end can consume it
+		$fields["authorEmail"] = round(floatval($this->authorEmail->format("U.u")) * 1000);
+		return($fields);
+	}
+}
