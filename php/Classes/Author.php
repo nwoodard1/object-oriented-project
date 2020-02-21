@@ -55,21 +55,17 @@ class Author {
 	private $authorUsername;
 
 
-	/**
-	 * constructor for this Author
-	 *
-	 * @param string|Uuid $newAuthorId id of this Author or null if a new Author
-	 * @param string $newAuthorAvatarUrl string containing author avatar
-	 * @param string $newAuthorActivationToken string containing activation token
-	 * @param string|null $newAuthorEmail string author was activated or null
-	 * @param string $newAuthorHash string containing encrypted password for author
-	 * @param string $newAuthorUsername string containing the username of the author
-	 * @throws \InvalidArgumentException if data types are not InvalidArgumentException
-	 * @throws \RangeException if data values are out of bounds (e.g., strings too long, negative integers)
-	 * @throws \TypeError if data types violate type hints
-	 * @throws \Exception if some other exception occurs
-	 * @Documentation https://php.net/manual/en/languages.oop5.decon.php
-	 **/
+    /**
+     * constructor for this Author
+     *
+     * @param string|Uuid $newAuthorId id of this Author or null if a new Author
+     * @param $newAuthorAvatarURL
+     * @param string $newAuthorActivationToken string containing activation token
+     * @param string|null $newAuthorEmail string author was activated or null
+     * @param string $newAuthorHash string containing encrypted password for author
+     * @param string $newAuthorUsername string containing the username of the author
+     * @Documentation https://php.net/manual/en/languages.oop5.decon.php
+     */
 
 	public function __construct($newAuthorId, $newAuthorAvatarURL, $newAuthorActivationToken, $newAuthorEmail, string $newAuthorHash, $newAuthorUsername) {
 		try {
